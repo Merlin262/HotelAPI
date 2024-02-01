@@ -1,0 +1,507 @@
+use master;
+drop database HotelMaior;
+create database HotelMaior;
+use HotelMaior;
+ 
+CREATE TABLE Endereco (
+    Pais VARCHAR(50),
+    Estado VARCHAR(50),
+    Cidade VARCHAR(50),
+    Rua VARCHAR(50),
+    Numero INT,
+    IdEndereco INT PRIMARY KEY,
+    Complemento VARCHAR(50)
+);
+
+CREATE TABLE Clientes (
+    IdCliente INT PRIMARY KEY,
+    NomeCliente VARCHAR(50),
+    Nacionalidade VARCHAR(50),
+    EmailCliente VARCHAR(50),
+    TelefoneCliente VARCHAR(50),
+    fk_Endereco_IdEndereco INT,
+    FOREIGN KEY (fk_Endereco_IdEndereco) REFERENCES Endereco (IdEndereco) ON DELETE CASCADE
+);
+
+CREATE TABLE Pedidos (
+    IdPedido INT PRIMARY KEY,
+    DataPedido DATE,
+    fk_Clientes_IdCliente INT,
+    FOREIGN KEY (fk_Clientes_IdCliente) REFERENCES Clientes(IdCliente) ON DELETE CASCADE
+);
+
+
+CREATE TABLE Filiais (
+    NomeFilial VARCHAR(50),
+    NumeroQuartos INT,
+    QtdEstrelas INT,
+	CoeficienteFilialPreco float,
+    IdFilial INT PRIMARY KEY,
+    fk_Endereco_IdEndereco INT,
+    FOREIGN KEY (fk_Endereco_IdEndereco) REFERENCES Endereco (IdEndereco) ON DELETE CASCADE
+);
+
+CREATE TABLE TiposQuarto (
+    IdQuarto INT PRIMARY KEY,
+    DescricaoQuarto VARCHAR(50),
+    ValorQuarto DECIMAL
+);
+
+CREATE TABLE TipoFuncionario (
+    IdTipoFuncionario INT PRIMARY KEY,
+    Descricao VARCHAR(50)
+);
+
+CREATE TABLE Funcionarios (
+    IdFuncionario INT PRIMARY KEY,
+    NomeFuncionario VARCHAR(50),
+    fk_Filiais_IdFilial INT,
+    fk_TipoFuncionario_IdTipoFuncionario INT,
+    FOREIGN KEY (fk_Filiais_IdFilial) REFERENCES Filiais (IdFilial) ON DELETE CASCADE,
+    FOREIGN KEY (fk_TipoFuncionario_IdTipoFuncionario) REFERENCES TipoFuncionario (IdTipoFuncionario) ON DELETE CASCADE
+);
+
+CREATE TABLE Reservas (
+    IdReserva INT PRIMARY KEY,
+    CheckIn DATE,
+    CheckOut DATE,
+    Cancelado BIT,
+    Valor DECIMAL,
+    NumPessoas INT,
+    fk_Clientes_IdCliente INT,
+    fk_Funcionarios_IdFuncionario INT,
+    FOREIGN KEY (fk_Clientes_IdCliente) REFERENCES Clientes (IdCliente) ON DELETE CASCADE,
+    FOREIGN KEY (fk_Funcionarios_IdFuncionario) REFERENCES Funcionarios (IdFuncionario)
+);
+
+CREATE TABLE Quartos (
+    NumeroQuarto INT PRIMARY KEY,
+    CapacidadeMaxima INT,
+    CapacidadeOpcional BIT,
+    Adaptavel BIT,
+    fk_Filiais_IdFilial INT,
+    fk_TiposQuarto_IdQuarto INT,
+    fk_Reservas_IdReserva INT,
+    FOREIGN KEY (fk_Filiais_IdFilial) REFERENCES Filiais (IdFilial) ON DELETE CASCADE,
+    FOREIGN KEY (fk_TiposQuarto_IdQuarto) REFERENCES TiposQuarto (IdQuarto),
+    FOREIGN KEY (fk_Reservas_IdReserva) REFERENCES Reservas (IdReserva) 
+);
+
+CREATE TABLE Conta (
+    IdConta INT PRIMARY KEY,
+    Valor DECIMAL,
+    ValorItens DECIMAL,
+    fk_Reservas_IdReserva INT,
+    FOREIGN KEY (fk_Reservas_IdReserva) REFERENCES Reservas (IdReserva) ON DELETE CASCADE
+);
+
+CREATE TABLE Itens (
+    IdItens INT PRIMARY KEY,
+    DescricaoItem VARCHAR(50),
+    ValorItem DECIMAL,
+    Entrega BIT,
+    fk_Filiais_IdFilial INT,
+    FOREIGN KEY (fk_Filiais_IdFilial)
+        REFERENCES Filiais (IdFilial)
+       
+);
+
+
+
+CREATE TABLE Lavanderia (
+    IdLavanderia INT PRIMARY KEY,
+    DescricaoServico VARCHAR(50),
+    ValorServico DECIMAL,
+    fk_Conta_IdConta INT,
+    FOREIGN KEY (fk_Conta_IdConta) REFERENCES Conta (IdConta) ON DELETE SET NULL
+);
+
+CREATE TABLE TipoPagamento (
+    IdTipoPagamento INT PRIMARY KEY,
+    DescricaoTipoPag VARCHAR(50)
+);
+
+CREATE TABLE Pagamento (
+    Codigo_NotaFiscal INT PRIMARY KEY,
+    Data_NotaFiscal DATETIME,
+    ValorTotal_NotaFiscal DECIMAL,
+    Codigo_TipoPagamento INT,
+    fk_Conta_IdConta INT,
+    fk_TipoPagamento_IdTipoPagamento INT,
+    FOREIGN KEY (fk_Conta_IdConta) REFERENCES Conta (IdConta) ON DELETE CASCADE,
+    FOREIGN KEY (fk_TipoPagamento_IdTipoPagamento) REFERENCES TipoPagamento (IdTipoPagamento) ON DELETE CASCADE
+);
+
+
+
+
+CREATE TABLE ItensPedidos (
+    IdItemPedido INT PRIMARY KEY,
+    DescricaoItem VARCHAR(50),
+    Quantidade INT,
+    ValorItem DECIMAL,
+    fk_Pedidos_IdPedido INT,
+    FOREIGN KEY (fk_Pedidos_IdPedido) REFERENCES Pedidos (IdPedido) ON DELETE CASCADE
+);
+
+
+
+INSERT INTO Endereco (Pais, Estado, Cidade, Rua, Numero, IdEndereco, Complemento)
+VALUES ('Brasil', 'São Paulo', 'São Paulo', 'Rua A', 123, 1, 'Apto 101');
+
+INSERT INTO Endereco (Pais, Estado, Cidade, Rua, Numero, IdEndereco, Complemento)
+VALUES ('Portugal', 'Lisboa', 'Lisboa', 'Rua B', 456, 2, 'Casa');
+
+INSERT INTO Endereco (Pais, Estado, Cidade, Rua, Numero, IdEndereco, Complemento)
+VALUES ('Espanha', 'Madrid', 'Madrid', 'Rua C', 789, 3, 'Andar 2');
+
+INSERT INTO Endereco (Pais, Estado, Cidade, Rua, Numero, IdEndereco)
+VALUES ('Espanha', 'Madrid', 'Madrid', 'Rua C', 789, 4);
+
+INSERT INTO Endereco (Pais, Estado, Cidade, Rua, Numero, IdEndereco)
+VALUES ('Espanha', 'Madrid', 'Madrid', 'Rua C', 789, 5);
+
+INSERT INTO Endereco (Pais, Estado, Cidade, Rua, Numero, IdEndereco)
+VALUES ('Espanha', 'Madrid', 'Madrid', 'Rua C', 789, 6);
+
+
+
+
+INSERT INTO Clientes (IdCliente, NomeCliente, Nacionalidade, EmailCliente, TelefoneCliente, fk_Endereco_IdEndereco)
+VALUES (1, 'João Silva', 'Brasileiro', 'joao@email.com', '123456789', 1);
+
+INSERT INTO Clientes (IdCliente, NomeCliente, Nacionalidade, EmailCliente, TelefoneCliente, fk_Endereco_IdEndereco)
+VALUES (2, 'Maria Oliveira', 'Portuguesa', 'maria@email.com', '987654321', 2);
+
+INSERT INTO Clientes (IdCliente, NomeCliente, Nacionalidade, EmailCliente, TelefoneCliente, fk_Endereco_IdEndereco)
+VALUES (3, 'Carlos Perez', 'Espanhol', 'carlos@email.com', '456789123', 3);
+
+
+
+
+INSERT INTO Filiais (NomeFilial, NumeroQuartos, QtdEstrelas, CoeficienteFilialPreco, IdFilial, fk_Endereco_IdEndereco)
+VALUES ('Hotel A', 100, 4, 1, 1, 4);
+
+INSERT INTO Filiais (NomeFilial, NumeroQuartos, QtdEstrelas, CoeficienteFilialPreco, IdFilial, fk_Endereco_IdEndereco)
+VALUES ('Hotel B', 150, 5, 1.1, 2, 5);
+
+INSERT INTO Filiais (NomeFilial, NumeroQuartos, QtdEstrelas, CoeficienteFilialPreco, IdFilial, fk_Endereco_IdEndereco)
+VALUES ('Hotel C', 200, 3, 1.2, 3, 6);
+
+
+
+
+INSERT INTO TiposQuarto (IdQuarto, DescricaoQuarto, ValorQuarto)
+VALUES (1, 'solteiro', 150.00);
+
+INSERT INTO TiposQuarto (IdQuarto, DescricaoQuarto, ValorQuarto)
+VALUES (2, 'casal, família', 250.00);
+
+INSERT INTO TiposQuarto (IdQuarto, DescricaoQuarto, ValorQuarto)
+VALUES (3, 'presidencial', 500.00);
+
+
+
+
+INSERT INTO TipoFuncionario (IdTipoFuncionario, Descricao)
+VALUES (1, 'gerente');
+
+INSERT INTO TipoFuncionario (IdTipoFuncionario, Descricao)
+VALUES (2, 'diretor');
+
+INSERT INTO TipoFuncionario (IdTipoFuncionario, Descricao)
+VALUES (3, 'contabilidade ');
+
+
+
+INSERT INTO Funcionarios (IdFuncionario, NomeFuncionario, fk_Filiais_IdFilial, fk_TipoFuncionario_IdTipoFuncionario)
+VALUES (1, 'Ana Oliveira', 1, 1);
+
+INSERT INTO Funcionarios (IdFuncionario, NomeFuncionario, fk_Filiais_IdFilial, fk_TipoFuncionario_IdTipoFuncionario)
+VALUES (2, 'Pedro Silva', 2, 2);
+
+INSERT INTO Funcionarios (IdFuncionario, NomeFuncionario, fk_Filiais_IdFilial, fk_TipoFuncionario_IdTipoFuncionario)
+VALUES (3, 'Marta Pereira', 3, 1);
+
+
+
+INSERT INTO Reservas (IdReserva, CheckIn, CheckOut, Cancelado, Valor, NumPessoas, fk_Clientes_IdCliente, fk_Funcionarios_IdFuncionario)
+VALUES (1, '2024-01-01', '2024-01-11', 0, 00.00, 2, 1, 1);
+
+INSERT INTO Reservas (IdReserva, CheckIn, CheckOut, Cancelado, Valor, NumPessoas, fk_Clientes_IdCliente, fk_Funcionarios_IdFuncionario)
+VALUES (2, '2024-02-01', '2024-02-11', 0, 00.00, 3, 2, 2);
+
+INSERT INTO Reservas (IdReserva, CheckIn, CheckOut, Cancelado, Valor, NumPessoas, fk_Clientes_IdCliente, fk_Funcionarios_IdFuncionario)
+VALUES (3, '2024-03-01', '2024-03-11', 1, 00.00, 4, 3, 1);
+
+
+
+INSERT INTO Quartos (NumeroQuarto, CapacidadeMaxima, CapacidadeOpcional, Adaptavel, fk_Filiais_IdFilial, fk_TiposQuarto_IdQuarto, fk_Reservas_IdReserva)
+VALUES (101, 2, 1, 1, 1, 1, 1);
+
+INSERT INTO Quartos (NumeroQuarto, CapacidadeMaxima, CapacidadeOpcional, Adaptavel, fk_Filiais_IdFilial, fk_TiposQuarto_IdQuarto, fk_Reservas_IdReserva)
+VALUES (201, 4, 0, 1, 2, 2, 2);
+
+INSERT INTO Quartos (NumeroQuarto, CapacidadeMaxima, CapacidadeOpcional, Adaptavel, fk_Filiais_IdFilial, fk_TiposQuarto_IdQuarto, fk_Reservas_IdReserva)
+VALUES (301, 3, 1, 0, 3, 3, 3);
+
+INSERT INTO Quartos (NumeroQuarto, CapacidadeMaxima, CapacidadeOpcional, Adaptavel, fk_Filiais_IdFilial, fk_TiposQuarto_IdQuarto)
+VALUES (404, 3, 0, 0, 3, 3);
+
+
+
+INSERT INTO Conta (IdConta, Valor, fk_Reservas_IdReserva)
+VALUES (1, 300.00, 1);
+
+INSERT INTO Conta (IdConta, Valor, fk_Reservas_IdReserva)
+VALUES (2, 450.00, 2);
+
+INSERT INTO Conta (IdConta, Valor, fk_Reservas_IdReserva)
+VALUES (3, 600.00, 3);
+
+
+
+INSERT INTO Itens (IdItens, DescricaoItem, ValorItem, Entrega, fk_Filiais_IdFilial)
+VALUES (1, 'Item 1', 20.00, 0, 1);
+
+INSERT INTO Itens (IdItens, DescricaoItem, ValorItem, Entrega, fk_Filiais_IdFilial)
+VALUES (2, 'Item 2', 15.50, 1, 2);
+
+INSERT INTO Itens (IdItens, DescricaoItem, ValorItem, Entrega, fk_Filiais_IdFilial)
+VALUES (3, 'Item 3', 30.00, 0, 3);
+
+INSERT INTO Itens (IdItens, DescricaoItem, ValorItem, Entrega, fk_Filiais_IdFilial)
+VALUES (6, 'Item 6', 32.00, 0, 3);
+
+INSERT INTO Itens (IdItens, DescricaoItem, ValorItem, Entrega, fk_Filiais_IdFilial)
+VALUES (7, 'Item 7', 35.00, 0, 3);
+
+
+
+
+INSERT INTO Lavanderia (IdLavanderia, DescricaoServico, ValorServico, fk_Conta_IdConta)
+VALUES (1, 'Lavagem a seco', 30.00, 1);
+
+INSERT INTO Lavanderia (IdLavanderia, DescricaoServico, ValorServico, fk_Conta_IdConta)
+VALUES (2, 'Passar roupas', 15.00, 2);
+
+INSERT INTO Lavanderia (IdLavanderia, DescricaoServico, ValorServico, fk_Conta_IdConta)
+VALUES (3, 'Lavar roupa', 25.00, 3);
+
+
+
+INSERT INTO TipoPagamento (IdTipoPagamento, DescricaoTipoPag)
+VALUES (1, 'Cartão de crédito');
+
+INSERT INTO TipoPagamento (IdTipoPagamento, DescricaoTipoPag)
+VALUES (2, 'Dinheiro');
+
+INSERT INTO TipoPagamento (IdTipoPagamento, DescricaoTipoPag)
+VALUES (3, 'PIX');
+
+
+
+INSERT INTO Pagamento (Codigo_NotaFiscal, Data_NotaFiscal, ValorTotal_NotaFiscal, Codigo_TipoPagamento, fk_Conta_IdConta, fk_TipoPagamento_IdTipoPagamento)
+VALUES (1, '2024-01-12 15:20:00', 00.00, 1, 1, 1);
+
+INSERT INTO Pagamento (Codigo_NotaFiscal, Data_NotaFiscal, ValorTotal_NotaFiscal, Codigo_TipoPagamento, fk_Conta_IdConta, fk_TipoPagamento_IdTipoPagamento)
+VALUES (2, '2024-02-12 15:20:00', 00.00, 2, 2, 2);
+
+INSERT INTO Pagamento (Codigo_NotaFiscal, Data_NotaFiscal, ValorTotal_NotaFiscal, Codigo_TipoPagamento, fk_Conta_IdConta, fk_TipoPagamento_IdTipoPagamento)
+VALUES (3, '2024-03-12 15:20:00', 00.00, 3, 3, 3);
+
+
+INSERT INTO Pedidos (IdPedido, DataPedido, fk_Clientes_IdCliente)
+VALUES
+    (101, '2024-01-01', 1),
+    (102, '2024-02-01', 2);
+
+INSERT INTO ItensPedidos (IdItemPedido, DescricaoItem, Quantidade, ValorItem, fk_Pedidos_IdPedido)
+VALUES
+    (1001, 'Produto A', 2, 50.00, 101),
+    (1002, 'Produto B', 3, 30.00, 101),
+    (1003, 'Produto C', 1, 80.00, 102);
+
+-----------------------------------------------------------------------
+
+CREATE PROCEDURE dbo.CalcularEAtualizarReserva(
+    @IdReserva INT,
+    @IdFilial INT,
+    @NumeroQuarto INT
+)
+AS
+BEGIN
+    DECLARE @QuantidadeDias INT;
+    DECLARE @resultado DECIMAL;
+
+    SELECT @QuantidadeDias = DATEDIFF(DAY, R.CheckIn, R.CheckOut)
+    FROM Reservas R
+    WHERE R.IdReserva = @IdReserva;
+
+    SELECT @resultado = F.CoeficienteFilialPreco * TQ.ValorQuarto * @QuantidadeDias
+    FROM Filiais F
+    JOIN Quartos Q ON F.IdFilial = Q.fk_Filiais_IdFilial
+    JOIN TiposQuarto TQ ON Q.fk_TiposQuarto_IdQuarto = TQ.IdQuarto
+    WHERE F.IdFilial = @IdFilial
+      AND Q.NumeroQuarto = @NumeroQuarto;
+
+    UPDATE Reservas
+    SET Valor = @resultado
+    WHERE IdReserva = @IdReserva;
+
+    UPDATE Conta
+    SET Valor = @resultado
+    WHERE fk_Reservas_IdReserva = @IdReserva;
+END;
+
+
+
+DECLARE @IdReserva INT, @IdFilial INT, @NumeroQuarto INT;
+SET @IdReserva = 3;
+SET @IdFilial = 3;
+SET @NumeroQuarto = 301;
+
+EXEC dbo.CalcularEAtualizarReserva @IdReserva, @IdFilial, @NumeroQuarto;
+
+
+
+------------------------------------------------------------
+
+select * from Reservas;
+select * from conta;
+select * from Filiais
+
+----------------------------------------------------------------
+
+CREATE PROCEDURE dbo.AtualizarValorItensConta @IdReserva INT, @IdCliente INT
+AS
+BEGIN
+    DECLARE @Total DECIMAL;
+
+    SELECT @Total = ISNULL(SUM(ip.ValorItem), 0)
+    FROM ItensPedidos ip
+    JOIN Pedidos p ON ip.fk_Pedidos_IdPedido = p.IdPedido
+    WHERE p.fk_Clientes_IdCliente = @IdCliente;
+
+    UPDATE Conta
+    SET ValorItens = @Total
+    WHERE fk_Reservas_IdReserva = @IdReserva;
+END;
+
+
+
+DECLARE @IdCliente INT, @IdReserva INT;
+SET @IdCliente = 1;
+SET @IdReserva = 1;
+
+EXEC dbo.AtualizarValorItensConta @IdReserva, @IdCliente;
+
+PRINT 'A soma dos valores dos itens foi atualizada na Conta.';
+
+----------------------------------------------------------------
+select * from Reservas;
+select * from Pedidos;
+select * from ItensPedidos;
+select * from Conta;
+select * from Pagamento;
+----------------------------------------------------------------
+
+CREATE PROCEDURE dbo.AtualizarValorTotalNotaFiscal @Codigo_NotaFiscal INT
+AS
+BEGIN
+    DECLARE @Total DECIMAL;
+
+    SELECT @Total = ISNULL(SUM(c.Valor + c.ValorItens), 0)
+    FROM Conta c
+    JOIN Pagamento p ON c.IdConta = p.fk_Conta_IdConta
+    WHERE p.Codigo_NotaFiscal = @Codigo_NotaFiscal;
+
+    UPDATE Pagamento
+    SET ValorTotal_NotaFiscal = @Total
+    WHERE Codigo_NotaFiscal = @Codigo_NotaFiscal;
+END;
+
+
+
+DECLARE @Codigo_NotaFiscal INT;
+SET @Codigo_NotaFiscal = 1;
+
+EXEC dbo.AtualizarValorTotalNotaFiscal @Codigo_NotaFiscal;
+
+PRINT 'O ValorTotal_NotaFiscal foi atualizado na tabela Pagamento.';
+
+-----------------------------------------
+
+DECLARE @NumeroQuarto INT = 101;
+
+--Busca para o cliente ver o seu quarto
+
+SELECT t.DescricaoQuarto, t.ValorQuarto
+FROM TiposQuarto t
+INNER JOIN Quartos q ON t.IdQuarto = q.fk_TiposQuarto_IdQuarto
+WHERE q.NumeroQuarto = @NumeroQuarto;
+
+
+
+--Busca os servicos disponiveis na lavanderia 
+SELECT IdLavanderia, DescricaoServico, ValorServico
+FROM Lavanderia;
+
+
+
+DECLARE @IdCLiente INT = 1;
+
+--Busca informações gerais sobre a estadia do cliente
+SELECT r.IdReserva, r.CheckIn, r.CheckOut, r.Cancelado, r.Valor, r.NumPessoas, f.NomeFuncionario
+	FROM Reservas r
+	INNER JOIN Funcionarios f ON r.fk_Funcionarios_IdFuncionario = f.IdFuncionario
+	WHERE r.fk_Clientes_IdCliente = @IdCLiente;
+
+--Busca os quartos disponiveis para hospedagem
+SELECT q.NumeroQuarto, q.CapacidadeMaxima, q.Adaptavel
+	FROM Quartos q
+	LEFT JOIN Reservas r ON q.fk_Reservas_IdReserva = r.IdReserva
+	WHERE r.IdReserva IS NULL;
+
+
+DECLARE @Cidade VARCHAR(30) = 'Madrid';
+
+-- Selecione os quartos disponíveis para hospedagem em uma cidade específica
+SELECT q.NumeroQuarto, q.CapacidadeMaxima, q.Adaptavel
+FROM Quartos q
+LEFT JOIN Reservas r ON q.fk_Reservas_IdReserva = r.IdReserva
+WHERE r.IdReserva IS NULL
+AND q.fk_Filiais_IdFilial IN (
+    -- Subconsulta para obter as filiais com endereço na cidade fornecida
+    SELECT f.IdFilial
+    FROM Filiais f
+    INNER JOIN Endereco e ON f.fk_Endereco_IdEndereco = e.IdEndereco
+    WHERE e.Cidade = @Cidade
+);
+
+
+--Seleciona as informações das reservas de determinado cliente em um intervalo determinado
+
+DECLARE @IdCliente2 INT = 1; 
+DECLARE @DataInicio DATE = '2024-01-01'; 
+DECLARE @DataFim DATE = '2024-02-01'; 
+
+
+SELECT r.IdReserva, r.CheckIn, r.CheckOut, r.Cancelado, r.Valor, r.NumPessoas, f.NomeFuncionario
+	FROM Reservas r
+	INNER JOIN Funcionarios f ON r.fk_Funcionarios_IdFuncionario = f.IdFuncionario
+	WHERE r.fk_Clientes_IdCliente = @IdCliente2 AND r.CheckIn BETWEEN @DataInicio AND @DataFim;
+
+
+SELECT IdItens, DescricaoItem, ValorItem
+	FROM Itens;
+
+
+
+
+
+select * from Endereco;
+
+select * from Clientes;
+
+select * from TipoFuncionario;
